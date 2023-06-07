@@ -22,7 +22,7 @@ describe("TokenMaster", () => {
 
     //contracts folder
     const TokenMaster = await ethers.getContractFactory("TokenMaster")
-    // Pas compris comment il sait que le compte qui deploy est deployer
+    // Pas compris comment il sait que le compte qui deploy est deployer -> surement premier de la list getsigners
     tokenMaster = await TokenMaster.deploy(NAME, SYMBOL)
 
     //connect -> specify the account to use
@@ -74,5 +74,35 @@ describe("TokenMaster", () => {
       expect(occasion.time).to.be.equal(OCCASION_TIME)
       expect(occasion.location).to.be.equal(OCCASION_LOCATION)
     })
+  })
+
+  describe("Minting", () => {
+
+    const ID = 1
+    const seat = 50
+    const amount = ethers.utils.parseUnits("1", "ether")
+
+    beforeEach(async () => {
+      //value is metadata of transaction
+      const transaction = await tokenMaster.connect(buyer).mint(ID, seat, { value: amount })
+      await transaction.wait()
+    })
+
+    it("Updates ticket count", async () => {
+      const occasion = await tokenMaster.getOccasion(ID)
+      //We can console.log
+      console.log(expect(occasion.tickets).to.be.equal(OCCASION_MAX_TICKETS - 1))
+    })
+
+    it("Updates buying status", async () => {
+      const status = await tokenMaster.hasBought(ID, buyer.address)
+      expect(status).to.be.equal(true)
+    })
+
+    it("Updates seat status", async () => {
+      const owner = await tokenMaster.seatTaken(ID, seat)
+      expect(owner).to.be.equal(buyer.address)
+    })
+
   })
 })

@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract TokenMaster is ERC721 {
     address public owner;
     uint256 public totalOccasions; //Event counter, start at 0 by default
+    uint256 public totalSupply;
 
     //Occasion = Event => Struct define an Event, not create one
     //Event is a reserved keywork in Sol, can't use it as variable name or else
@@ -23,6 +24,14 @@ contract TokenMaster is ERC721 {
     //Key => value pair
     // id => struct
     mapping(uint256 => Occasion) occasions;
+    // idOccasion -> seatNumber => addressOfSeater 
+    mapping(uint256 => mapping(uint256 => address)) public seatTaken;
+
+    //Array of taken seats
+    mapping(uint256 => uint256[]) seatsTaken;
+
+    //Check if an address has already bought a ticket
+    mapping(uint256 => mapping(address => bool)) public hasBought;
 
     modifier onlyOwner(){
         require(msg.sender == owner);
@@ -59,5 +68,23 @@ contract TokenMaster is ERC721 {
 
     function getOccasion(uint256 _id) public view returns (Occasion memory) {
         return occasions[_id];
+    }
+
+    function mint(uint256 _id, uint256 _seat) public payable {
+        // Update ticket count
+        occasions[_id].tickets -= 1;
+
+        hasBought[_id][msg.sender] = true; // Update Buying status
+
+        seatTaken[_id][_seat] = msg.sender; // Assign seat
+
+        seatsTaken[_id].push(_seat); // Updates seats currently taken
+
+
+        //totalSupply = tokenId
+        totalSupply++;
+
+    
+        _safeMint(msg.sender,totalSupply);
     }
 }
