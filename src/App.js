@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { ethers } from 'ethers'
 
 // Components
@@ -16,7 +16,6 @@ import config from './config.json'
 function App() {
   const [provider, setProvider] = useState(null)
   const [account, setAccount] = useState(null)
-
   const [tokenMaster, setTokenMaster] = useState(null)
   const [occasions, setOccasions] = useState([])
 
@@ -24,23 +23,36 @@ function App() {
   const [toggle, setToggle] = useState(false)
 
   const loadBlockchainData = async () => {
+
+    //Blockchain connection
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     setProvider(provider)
 
     const network = await provider.getNetwork()
-    const tokenMaster = new ethers.Contract(config[network.chainId].TokenMaster.address, TokenMaster, provider)
+
+    //from config.json
+    const address = config[network.chainId].TokenMaster.address
+
+    //from ethers.js documentation
+    //Contract(address, abi, provider)
+    const tokenMaster = new ethers.Contract(address, TokenMaster, provider)
     setTokenMaster(tokenMaster)
+    console.log(tokenMaster.address)
 
+    //Get occasions data
     const totalOccasions = await tokenMaster.totalOccasions()
-    const occasions = []
+    console.log({ "totalOccasions": totalOccasions.toString() })
 
+    const occasions = []
     for (var i = 1; i <= totalOccasions; i++) {
       const occasion = await tokenMaster.getOccasion(i)
       occasions.push(occasion)
     }
 
     setOccasions(occasions)
+    console.log(occasions)
 
+    //Refresh account automatically on page
     window.ethereum.on('accountsChanged', async () => {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
       const account = ethers.utils.getAddress(accounts[0])
@@ -56,8 +68,7 @@ function App() {
     <div>
       <header>
         <Navigation account={account} setAccount={setAccount} />
-
-        <h2 className="header__title"><strong>Event</strong> Tickets</h2>
+        <h2 className='header__title'><strong>Event</strong> Tickets</h2>
       </header>
 
       <Sort />
@@ -74,8 +85,7 @@ function App() {
             setToggle={setToggle}
             setOccasion={setOccasion}
             key={index}
-          />
-        ))}
+          />))}
       </div>
 
       {toggle && (
@@ -86,6 +96,7 @@ function App() {
           setToggle={setToggle}
         />
       )}
+
     </div>
   );
 }

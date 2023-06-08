@@ -17,7 +17,7 @@ async function main() {
 
   console.log(`Deployed TokenMaster Contract at: ${tokenMaster.address}\n`)
 
-  // List 6 events
+  // List 5 events
   const occasions = [
     {
       name: "UFC Miami",

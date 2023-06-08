@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 
 const Card = ({ occasion, toggle, setToggle, setOccasion }) => {
+  //Open seating map
   const togglePop = () => {
     setOccasion(occasion)
     toggle ? setToggle(false) : setToggle(true)
