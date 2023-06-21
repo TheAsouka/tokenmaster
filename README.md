@@ -31,3 +31,6 @@ In a separate terminal execute:
 
 ### 6. Start frontend
 `$ npm run start`
+
+### 7. In case of transaction error
+`Reset your nonce on metamask or use a custom one (Advanced settings)`

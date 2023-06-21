@@ -74,6 +74,7 @@ function App() {
       <Sort />
 
       <div className='cards'>
+
         {occasions.map((occasion, index) => (
           <Card
             occasion={occasion}
